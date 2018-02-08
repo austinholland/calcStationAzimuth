@@ -17,6 +17,8 @@ import sys
 import argparse
 import os
 
+# Add path to dependencies
+sys.path.append('/Users/aaholland/Documents/ANSS/Orientation/waveformUtils')
 
 ''' 
 This function will calculate the azimuth of a station from particle motion.
