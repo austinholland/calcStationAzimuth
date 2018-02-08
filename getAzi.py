@@ -10,7 +10,7 @@ from numpy import sin, cos
 from numpy import arctan as atan
 from scipy.sparse.linalg import lsqr
 from scipy.linalg import eig
-from getCommandLineInfo import getargs
+
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -19,7 +19,7 @@ import os
 
 # Add path to dependencies
 sys.path.append('/Users/aaholland/Documents/ANSS/Orientation/waveformUtils')
-
+from getCommandLineInfo import getargs
 ''' 
 This function will calculate the azimuth of a station from particle motion.
 
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     client = Client("IRIS")
     inventory = client.get_stations(network=net, station=stat, channel=chan,level="response", location="00",starttime=eventTime)
 
-    inventory.plot()
+    #inventory.plot()
 # next, get the station coordinates
     print("getting station coordinates")
     station_coordinates = []
@@ -204,17 +204,17 @@ if __name__ == "__main__":
             #st2.plot()
 
 # want to look at plots with travel times...
-            plt.subplot(3,1,1)
-            plt.plot(st[0].data,label='BH1')
-            plt.legend()
-            print(arrTime)
-            plt.subplot(3,1,2)
-            plt.plot(st[1].data,label='BH2')
-            plt.legend()
-            plt.subplot(3,1,3)
-            plt.plot(st[2].data,label='BHZ')
-            plt.legend()
-            #plt.show()
+#             plt.subplot(3,1,1)
+#             plt.plot(st[0].data,label='BH1')
+#             plt.legend()
+#             print(arrTime)
+#             plt.subplot(3,1,2)
+#             plt.plot(st[1].data,label='BH2')
+#             plt.legend()
+#             plt.subplot(3,1,3)
+#             plt.plot(st[2].data,label='BHZ')
+#             plt.legend()
+#             #plt.show()
 # next we need to filter. first some waveform prep...
             BHN.detrend('demean')
             BHE.detrend('demean')
@@ -281,8 +281,7 @@ if __name__ == "__main__":
                     str(eventTime) + '.png')
             print(fileName)
             plt.savefig(fileName,format='png')
-            #plt.show()
-            plt.close()
+
     
 # time to get serious!  we are ready to do the actual calculation!!!!!!!!
             A = np.transpose(np.matrix(SignalBHE.data))
@@ -410,8 +409,7 @@ if __name__ == "__main__":
 
             plt.legend(bbox_to_anchor=(0.8, 0.85, 1., 0.102),loc=3,borderaxespad=0.)
             plt.savefig(fileName,format='png')
-            #plt.show()
-            plt.close()
+
                     
 
         else:
