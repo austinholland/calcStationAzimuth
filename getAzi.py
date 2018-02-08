@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/local/bin/python3
 
 from obspy import UTCDateTime
 from obspy.clients.fdsn import Client
@@ -43,7 +43,7 @@ def rotatehorizontal(stream, angle1, angle2):
         angle1, angle2 = angle2, angle1
     if debugRot:
         print(stream)
-        print 'Angle1: ' + str(angle1) + ' Angle2: ' + str(angle2)
+        print( 'Angle1: ' + str(angle1) + ' Angle2: ' + str(angle2))
     theta_r1 = np.radians(angle1)
     theta_r2 = np.radians(angle2)
     swapSecond = False
@@ -52,7 +52,7 @@ def rotatehorizontal(stream, angle1, angle2):
 # if the components are swaped swap the matrix
     if theta_r1 > theta_r2 and swapSecond:
         if debugRot:
-            print 'Swap the components: ' + str((360. - angle1) - angle2)
+            print('Swap the components: ' + str((360. - angle1) - angle2))
         stream.sort(['channel'], reverse=True)
         theta_r1, theta_r2 = theta_r2, theta_r1
         print(stream)
@@ -145,7 +145,7 @@ if __name__ == "__main__":
                                                station[2], station[3]) 
             print("station lat, lon:"+str(station[2])+","+str(station[3]))
             statBaz = StationAziExpec[2]
-            print "The expected back azimuth for "+station[1]+" is "+str(statBaz)
+            print("The expected back azimuth for "+station[1]+" is "+str(statBaz))
             arrivals = model.get_travel_times(source_depth_in_km = eventDepth,
                                               distance_in_degree=DegDist,
                                               phase_list = ["P"])
@@ -205,7 +205,7 @@ if __name__ == "__main__":
             plt.subplot(3,1,1)
             plt.plot(st[0].data,label='BH1')
             plt.legend()
-            print arrTime
+            print(arrTime)
             plt.subplot(3,1,2)
             plt.plot(st[1].data,label='BH2')
             plt.legend()
@@ -277,7 +277,7 @@ if __name__ == "__main__":
             fileName =(os.getcwd() +'/'+ resDir +'/Input_'+
                     station[0] +'_'+ station[1] +'_'+
                     str(eventTime) + '.png')
-            print fileName
+            print(fileName)
             plt.savefig(fileName,format='png')
             #plt.show()
             plt.close()
@@ -295,8 +295,8 @@ if __name__ == "__main__":
             BHEsq = sum(SignalBHE.data*SignalBHE.data)
             eigMat = np.matrix([[BHNsq, BHNEsq], [BHNEsq, BHEsq]])
             eigd,eigv = eig(eigMat)
-            print "The eigenvalues"
-            print eigd
+            print("The eigenvalues")
+            print(eigd)
             line = np.real((eigd[1]/(eigd[0]+eigd[1]))-
                            (eigd[0]/(eigd[0]+eigd[1])))
             ang2 = np.degrees(np.arctan2(eigv[0][1],eigv[1][1]))
@@ -304,23 +304,23 @@ if __name__ == "__main__":
 # now do some stuff about the quadrant
             if (ang2<0):
                 ang2 = abs(ang2)+90
-                print"ang2 lt 0"
+                print("ang2 lt 0")
 
             if (ang2<0):
                 ang2 = ang2+180
-                print"ang2 lt 0"
+                print("ang2 lt 0")
 
             if abs(statBaz-(ang2+180))<abs(statBaz-ang2):
                 ang2 = np.mod(ang2+180,360)
-                print"ang2 is 180 off: "+str(ang2) 
+                print("ang2 is 180 off: "+str(ang2) )
 
             if(abs(statBaz-(ang+180))<abs(statBaz-ang)):
                 ang=np.mod(ang+180,360)
-                print"ang is 180 off: "+str(ang) 
+                print("ang is 180 off: "+str(ang) )
 
             if(ang<0):
                 ang=ang+180;
-                print"ang lt 0"
+                print("ang lt 0")
             print("The calculated values are: "+str(ang)+" and "+str(ang2))
 # capture some statistics
 # there is likely a better way to do this, but in the interest of time...
@@ -373,7 +373,7 @@ if __name__ == "__main__":
             fileName =(os.getcwd() +'/'+ resDir +'/Azimuth_'+
                     station[0] +'_'+ station[1] +'_'+
                     str(eventTime) + '.png')
-            print fileName
+            print(fileName)
             #plt.close()
             #plt.figure()
             #x = SignalBHE.data**2.
