@@ -5,6 +5,7 @@ from obspy.clients.fdsn import Client
 from obspy.geodetics.base import locations2degrees
 from obspy.geodetics.base import gps2dist_azimuth
 from obspy.taup import TauPyModel
+from obspy.clients import iris
 from obspy import Stream
 from numpy import sin, cos
 from numpy import arctan as atan
@@ -96,7 +97,7 @@ if __name__ == "__main__":
 
     statfile = open(os.getcwd()+'/'+parserval.resDir+'/Results_'+
                     str(eventTime)+'_'+parserval.network+'.csv','w')
-    statfile.write('station, channel, expected Baz, calc Baz 1, difference, calcBaz2, difference, linearity\n')
+    statfile.write('station, channel, location, expected Baz, calc Baz 1, difference, calcBaz2, difference, linearity\n')
 
 # event in philipines
 #eventTime = UTCDateTime("2017-01-10T06:13:48")
@@ -114,8 +115,7 @@ if __name__ == "__main__":
     print("building station list for the event")
     print (net,stat,chan,eventTime)
     client = Client("IRIS")
-    inventory = client.get_stations(network=net, station=stat, channel=chan,level="response", location="00",starttime=eventTime)
-
+    inventory = client.get_stations(network=net, station=stat, channel=chan,level="response", location="*",starttime=eventTime)
     #inventory.plot()
 # next, get the station coordinates
     print("getting station coordinates")
@@ -123,9 +123,10 @@ if __name__ == "__main__":
     for network in inventory:
         for station in network:
             for channel in station:
-                station_coordinates.append((network.code, station.code, 
+                if channel.code=='LH1':
+                    station_coordinates.append((network.code, station.code, 
                                             station.latitude, station.longitude, 
-                                            station.elevation,channel.azimuth))
+                                            station.elevation,channel.azimuth,channel.location_code))
 
 # then for each station in the list get the distance and azimuth
 # need to think about what source-receiver distances we want to use
@@ -133,6 +134,7 @@ if __name__ == "__main__":
 # pick a model for estimating arrival times
     print("calculating travel times and requesting data")
     model = TauPyModel(model="iasp91")
+    irisClient=iris.Client()
     for station in station_coordinates:
 # first calculate the source-receiver distance
         DegDist = locations2degrees(eventLat, eventLon,
@@ -161,10 +163,14 @@ if __name__ == "__main__":
             try:
                # st = client.get_waveforms(station[0],station[1],"00","BH?",
                #                           bTime,eTime,attach_response=True)
-                st = getMSDdata(station[0],station[1],"00","BH",btime,etime)
-                st.sort(keys=['channel'])
-            except:
-                print("No data for station "+station[1])
+#                 st = getMSDdata(station[0],station[1],"00","BH",btime,etime)
+#                 st.sort(keys=['channel'])
+                st=irisClient.timeseries(station[0],station[1],station[6],'LH1',bTime,eTime)
+                st+=irisClient.timeseries(station[0],station[1],station[6],'LH2',bTime,eTime)
+                st+=irisClient.timeseries(station[0],station[1],station[6],'LHZ',bTime,eTime)
+                st.merge()
+            except Exception as err:
+                print("No data for station "+station[1]+'\n\t'+str(err))
                 continue #use a continue to go back to the beginning of the loop
 
 # Break up the stream into traces to remove the gain
@@ -177,9 +183,9 @@ if __name__ == "__main__":
                 print("Station "+ station[1] + " doesn't have 3-comp data.")
                 continue
 
-            st[0] = BH1.remove_sensitivity()
-            st[1] = BH2.remove_sensitivity()
-            st[2] = BHZ.remove_sensitivity()
+            st[0] = BH1.remove_sensitivity(inventory)
+            st[1] = BH2.remove_sensitivity(inventory)
+            st[2] = BHZ.remove_sensitivity(inventory)
          
 # take a look at the data
             #st.plot()
@@ -267,17 +273,17 @@ if __name__ == "__main__":
             plt.figure()
             plt.subplot(3,1,1)
             plt.suptitle('Filtered, rotated and cut waveforms for %s'%(station[1]))
-            plt.plot(SignalBHN.data,label='BHN')
+            plt.plot(SignalBHN.data,label="LHN-%s" % (station[6]))
             plt.legend()
             #SignalBHN.plot()
             plt.subplot(3,1,2)
-            plt.plot(SignalBHE.data,label='BHE')
+            plt.plot(SignalBHE.data,label="LHE-%s" % (station[6]))
             plt.legend()
             plt.subplot(3,1,3)
-            plt.plot(SignalBHZ.data,label='BHZ')
+            plt.plot(SignalBHZ.data,label="LHZ-%s" % (station[6]))
             plt.legend()
             fileName =(os.getcwd() +'/'+ resDir +'/Input_'+
-                    station[0] +'_'+ station[1] +'_'+
+                    station[0] +'_'+ station[1] +'_'+station[6]+'_'+
                     str(eventTime) + '.png')
             print(fileName)
             plt.savefig(fileName,format='png')
@@ -327,11 +333,12 @@ if __name__ == "__main__":
 # there is likely a better way to do this, but in the interest of time...
 #            statfile.write('%s,%s,%s,%s,%s\n'%
 #                    station[1],station[2],statBaz,ang,ang2,line)
-            statfile.write(station[0]+', ')
-            statfile.write(station[1]+', ')
-            statfile.write(str(statBaz)+', ')
-            statfile.write(str(ang)+', ')
-            statfile.write(str(ang2)+', ')
+            statfile.write(station[0]+',')
+            statfile.write(station[1]+',')
+            statfile.write(station[6]+',')
+            statfile.write(str(statBaz)+',')
+            statfile.write(str(ang)+',')
+            statfile.write(str(ang2)+',')
             statfile.write(str(line)+'\n')
 
 # don't look at the plot if it's not worth your time.
@@ -367,12 +374,12 @@ if __name__ == "__main__":
             plt.plot(SignalBHE.data,SignalBHN.data, 'red',label='Particle Motion')
             plt.text(7*np.pi/4,2.5,str(station[1]+' '+ rotated + ' '+str(eventTime)),fontsize=14)
             printstr="linearity %.2f" % (line)
-            printstr1="SNR, BHN %.2f" % (SNR_BHN)
-            printstr2="SNR, BHE %.2f" % (SNR_BHE)
+            printstr1="SNR, LHN %.2f" % (SNR_BHN)
+            printstr2="SNR, LHE %.2f" % (SNR_BHE)
             plt.text(32*np.pi/20,2.7,(printstr+'\n'+
                      printstr1+'\n'+printstr2))
             fileName =(os.getcwd() +'/'+ resDir +'/Azimuth_'+
-                    station[0] +'_'+ station[1] +'_'+
+                    station[0] +'_'+ station[1] +'_'+station[6]+'_'+
                     str(eventTime) + '.png')
             print(fileName)
             #plt.close()

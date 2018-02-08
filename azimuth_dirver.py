@@ -14,7 +14,7 @@ for line in fh:
   dir=tsplit[0]
 
   resdirs.append(dir)
-  cmd="./getAzi.py -resDir %s -n US -cha 'BH1' -eventTime '%s' -eventLat %f -eventLon %f -eventDepth %d -sta '*'" % (dir,ot,float(lvals[1]),float(lvals[2]),float(lvals[3]))
+  cmd="./getAzi.py -resDir %s -n US -cha 'LH*' -eventTime '%s' -eventLat %f -eventLon %f -eventDepth %d -sta '*'" % (dir,ot,float(lvals[1]),float(lvals[2]),float(lvals[3]))
   print(cmd)
   os.system(cmd)
 fh.close()
