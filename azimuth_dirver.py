@@ -5,6 +5,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime.datetime as datetime
+from matplotlib.dates import date2num
 from obspy.core import *
 
 def add_azi_measurment(stadict,stakey,time,difference,linearity):
@@ -25,7 +26,18 @@ def plot_network_azi(stadict):
   """ This method takes a dictionary of azimuth measurements for multiple events and 
   creates plots for station netwok location NSL keys.
   """
-  for keys in stadict.keys():
+  for key in stadict.keys():
+    data=(stadict[key])
+    text="Mean %.2f - Std %.2f" % (np.mean(data[:,1]),np.std(data[:,1]))
+    plt.figure()
+    plt.subplot(211)
+    plt.plot_date(data[:,0],data[:,1])
+    plt.figtext(.2,.2,text)
+    plt.ylabel('Offset (degrees)')
+    plt.subplot(212)
+    plt.plot_date(data[:,0],data[:,2])
+    plt.ylabel('Linearity') 
+    plt.savefig("Azimuth_%s.png" % (key))
   
   
 def process_results(stadict,dir,ot):
@@ -67,4 +79,4 @@ if __name__=="__main__":
     stadict=process_results(stadict,dir,ot.datetime)
     
   fh.close()
-
+  plot_network_azi(stadict)
