@@ -97,8 +97,7 @@ if __name__ == "__main__":
     if not os.path.exists(os.getcwd() + '/' + resultdir):
         os.mkdir(os.getcwd() + '/' + resultdir)
 
-    statfile = open(os.getcwd()+'/'+parserval.resDir+'/Results_'+
-                    str(eventTime)+'_'+parserval.network+'.csv','w')
+    statfile = open(os.getcwd()+'/'+parserval.resDir+'/Results.csv','w')
     statfile.write('station, channel, location, expected Baz, calc Baz 1, difference, calcBaz2, difference, linearity\n')
 
 # event in philipines
