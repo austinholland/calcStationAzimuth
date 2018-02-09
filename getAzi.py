@@ -338,7 +338,7 @@ if __name__ == "__main__":
             statfile.write(station[1]+',')
             statfile.write(station[6]+',')
             statfile.write(str(statBaz)+',')
-            statfile.write(str(ang)+',')
+            statfile.write(str(ang[0])+',')
             statfile.write(str(ang2)+',')
             statfile.write(str(line)+'\n')
 
