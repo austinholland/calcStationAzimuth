@@ -27,7 +27,23 @@ This function will calculate the azimuth of a station from particle motion.
 This is a translation of Adam Ringler's matlab function.  
 
 '''
-
+def add_azi_measurment(stadict,stakey,time,difference,linearity):
+  """ This method is a hack to allow evaluating stations using multiple events and somewhat
+  breaks the original concept for this program.  Ideally this program would be built more
+  modular such that another script could access functions here, but since that is not
+  the case we will use this hack.
+  This solution uses a dictionary with the SNL (Station,Network,Location) as the
+  key it then saves the data in a nested list.
+  """
+  if stakey in stadict.keys():
+      stadict[stakey].append([time,difference,linearity])
+  else:
+      stadict[stakey]=[[time,difference,linearity]]
+  return stadict
+  
+def plot_network_azi(stadict):
+  """ This method
+  
 
 ########################################################################
 
